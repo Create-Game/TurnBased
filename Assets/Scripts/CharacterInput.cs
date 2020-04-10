@@ -16,7 +16,6 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField]
 	UnityEngine.UI.Text debugUseText;
 
-	bool useState;
 	ActionContainer actionContainer = new ActionContainer();
 
 
@@ -171,20 +170,17 @@ public class CharacterInput : MonoBehaviour
 		}
 	}
 
-	// Update is called once per frame
 	void Update()
     {
-		if (Input.GetMouseButtonDown(1))
-		{
-			useState = !useState;
-			debugUseText.text = useState ? "Use" : "Move";
-		}
+		GameInput.UpdateCharacterInput();
 
-		if (useState)
+		debugUseText.text = GameInput.useState ? "Use" : "Move";
+
+		if (GameInput.GetUse())
 		{
 			UpdateUse();
 		}
-		else
+		else if (GameInput.GetMove())
 		{
 			UpdateMove();
 		}
@@ -194,33 +190,27 @@ public class CharacterInput : MonoBehaviour
 
 	void UpdateMove()
 	{
-		if (Input.GetMouseButtonDown(0))
+		var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		RaycastHit info;
+		if (Physics.Raycast(ray, out info))
 		{
-			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			RaycastHit info;
-			if (Physics.Raycast(ray, out info))
-			{
-				actionContainer.SetCurrentAction(new MoveAction(agent, info.point, animator, Mathf.Epsilon));
-			}
+			actionContainer.SetCurrentAction(new MoveAction(agent, info.point, animator, Mathf.Epsilon));
 		}
 	}
 
 	void UpdateUse()
 	{
-		if (Input.GetMouseButtonDown(0))
+		var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		RaycastHit info;
+		if (Physics.Raycast(ray, out info))
 		{
-			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			RaycastHit info;
-			if (Physics.Raycast(ray, out info))
-			{
-				Equippable equippable = info.collider.GetComponent<Equippable>();
+			Equippable equippable = info.collider.GetComponent<Equippable>();
 
-				Action move = new MoveAction(agent, info.point, animator, equippable.radius);
-				Action use = move.child = new UseAnimationEventAction(animator, "use", animEvent);
-				use.child = new EventAction(() => equippable.Equip(characterRenderer));
+			Action move = new MoveAction(agent, info.point, animator, equippable.radius);
+			Action use = move.child = new UseAnimationEventAction(animator, "use", animEvent);
+			use.child = new EventAction(() => equippable.Equip(characterRenderer));
 
-				actionContainer.SetCurrentAction(move);
-			}
+			actionContainer.SetCurrentAction(move);
 		}
 	}
 }
