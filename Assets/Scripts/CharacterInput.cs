@@ -188,11 +188,14 @@ public class CharacterInput : MonoBehaviour
 		actionContainer.UpdateAction();
 	}
 
+	[SerializeField]
+	LayerMask movementMask;
+
 	void UpdateMove()
 	{
 		var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit info;
-		if (Physics.Raycast(ray, out info))
+		if (Physics.Raycast(ray, out info, 1000f, movementMask))
 		{
 			actionContainer.SetCurrentAction(new MoveAction(agent, info.point, animator, Mathf.Epsilon));
 		}
@@ -202,6 +205,7 @@ public class CharacterInput : MonoBehaviour
 	{
 		var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit info;
+
 		if (Physics.Raycast(ray, out info))
 		{
 			Equippable equippable = info.collider.GetComponent<Equippable>();
