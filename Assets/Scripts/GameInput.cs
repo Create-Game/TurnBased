@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.AI;
 
 public class GameInput: MonoBehaviour
@@ -15,8 +16,21 @@ public class GameInput: MonoBehaviour
 	static Vector3 startDragMousePosition;
 	static Vector3 lastFrameDragMousePosition;
 
+	public GameObject inventoryUI;
+
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.I))
+		{
+			inventoryUI.SetActive(true);
+		}
+	}
+
 	public static void UpdateCharacterInput()
 	{
+		if (EventSystem.current.IsPointerOverGameObject())
+			return;
+
 		leftClicked = false;
 		if (dragging)
 			wasDragging = true;

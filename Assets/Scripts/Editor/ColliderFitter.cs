@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class ColliderFitter : MonoBehaviour
 {
-	[MenuItem("Helpers/Collider Fitter")]
+	[MenuItem("Game Tools/Collider Fitter")]
 	static void FitCollider()
 	{
 		if (Selection.activeGameObject)

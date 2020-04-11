@@ -210,11 +210,14 @@ public class CharacterInput : MonoBehaviour
 		{
 			Equippable equippable = info.collider.GetComponent<Equippable>();
 
-			Action move = new MoveAction(agent, info.point, animator, equippable.radius);
-			Action use = move.child = new UseAnimationEventAction(animator, "use", animEvent);
-			use.child = new EventAction(() => equippable.Equip(characterRenderer));
+			if (equippable)
+			{
+				Action move = new MoveAction(agent, info.point, animator, equippable.radius);
+				Action use = move.child = new UseAnimationEventAction(animator, "use", animEvent);
+				use.child = new EventAction(() => equippable.Equip(characterRenderer));
 
-			actionContainer.SetCurrentAction(move);
+				actionContainer.SetCurrentAction(move);
+			}
 		}
 	}
 }
