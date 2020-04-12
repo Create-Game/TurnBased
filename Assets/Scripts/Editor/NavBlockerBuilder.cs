@@ -6,12 +6,6 @@ using UnityEditor;
 
 public class NavBlockerBuilder: EditorWindow
 {
-	string myString = "Hello World";
-	bool groupEnabled;
-	bool myBool = true;
-	float myFloat = 1.23f;
-
-	// Add menu named "My Window" to the Window menu
 	[MenuItem("Game Tools/Build Nav Blocker")]
 	static void Init()
 	{
@@ -20,63 +14,32 @@ public class NavBlockerBuilder: EditorWindow
 		window.Show();
 	}
 
-	const float timeToShow = 8f;
-
-	private void Update()
-	{
-		for (int i = shownObjects.Count - 1; i >= 0; i--)
-		{
-			Shown shown = shownObjects[i];
-
-			shown.time += Time.deltaTime;
-
-			if (shown.time >= timeToShow)
-			{
-				Debug.Log(shown.time);
-				shown.shown.SetActive(shown.wasActive);
-				shownObjects.RemoveAt(i);
-			}
-			else
-			{
-				shownObjects[i] = shown;
-			}
-		}
-	}
-
-	private void OnDisable()
-	{
-		Debug.Log("disable");
-		foreach (var shown in shownObjects)
-			shown.shown.SetActive(shown.wasActive);
-	}
-
-	struct Shown
-	{
-		public GameObject shown;
-		public bool wasActive;
-		public float time;
-
-		public Shown(GameObject shown, bool wasActive) : this()
-		{
-			this.shown = shown;
-			this.wasActive = wasActive;
-		}
-	}
-
-	List<Shown> shownObjects = new List<Shown>();
+	Editor activeObjectEditor;
+	GameObject previewTarget;
 
 	void OnGUI()
 	{
-		//if (GUILayout.Button("Rebuild mesh"))
-		//{
-		//	NavMeshBuildSettings settings = new NavMeshBuildSettings();
-		//
-		//	settings.
-		//	NavMeshBuilder.BuildNavMeshData()
-		//	NavMeshBuilder.UpdateNavMeshDataAsync()
-		//}
+		GameObject obj = null;
 
-		GameObject obj = Selection.activeObject as GameObject;
+		if (Selection.activeContext)
+		{
+			obj = Selection.activeContext as GameObject;
+
+			if (GUILayout.Button("Select " + Selection.activeContext.name))
+			{
+				Selection.SetActiveObjectWithContext(Selection.activeContext, null);
+				if (activeObjectEditor != null)
+				{
+					DestroyImmediate(activeObjectEditor);
+					activeObjectEditor = null;
+				}
+			}
+		}
+		else
+		{
+			obj = Selection.activeObject as GameObject;
+			GUILayout.Label(obj.name);
+		}
 
 		if (!obj)
 		{
@@ -95,19 +58,15 @@ public class NavBlockerBuilder: EditorWindow
 
 			string showStr = string.Format("Make '{0}' nav static?", rend.name);
 
-			if (shownObjects.Find(x => x.shown == rend.gameObject).shown == null)
+			if (GUILayout.Button(showStr, GUILayout.Width(150f)))
 			{
-				if (GUILayout.Button(showStr, GUILayout.Width(150f)))
+				EditorGUIUtility.PingObject(rend);
+				Selection.SetActiveObjectWithContext(rend.gameObject, obj);
+				if (activeObjectEditor != null)
 				{
-					EditorGUIUtility.PingObject(rend);
-					(SceneView.sceneViews[0] as SceneView)?.Frame(rend.bounds);
-					shownObjects.Add(new Shown(rend.gameObject, rend.gameObject.activeSelf));
-					rend.gameObject.SetActive(!rend.gameObject.activeSelf);
+					DestroyImmediate(activeObjectEditor);
+					activeObjectEditor = null;
 				}
-			}
-			else
-			{
-				GUILayout.Label(showStr, GUILayout.Width(150f));
 			}
 
 			bool flagSet = GUILayout.Toggle(hasFlag, GUIContent.none, GUILayout.Width(15f));
@@ -151,12 +110,29 @@ public class NavBlockerBuilder: EditorWindow
 			GUILayout.EndHorizontal();
 		}
 
-		//GUILayout.Label("Base Settings", EditorStyles.boldLabel);
-		//myString = EditorGUILayout.TextField("Text Field", myString);
-		//
-		//groupEnabled = EditorGUILayout.BeginToggleGroup("Optional Settings", groupEnabled);
-		//myBool = EditorGUILayout.Toggle("Toggle", myBool);
-		//myFloat = EditorGUILayout.Slider("Slider", myFloat, -3, 3);
-		//EditorGUILayout.EndToggleGroup();
+		if (previewTarget != Selection.activeObject)
+		{
+			if (activeObjectEditor != null)
+			{
+				DestroyImmediate(activeObjectEditor);
+				activeObjectEditor = null;
+			}
+
+			if (Selection.activeObject != null)
+			{
+				previewTarget = Selection.activeObject as GameObject;
+				activeObjectEditor = Editor.CreateEditor(Selection.activeObject);
+			}
+		}
+		else if (activeObjectEditor == null)
+		{
+			if (Selection.activeObject != null)
+			{
+				previewTarget = Selection.activeObject as GameObject;
+				activeObjectEditor = Editor.CreateEditor(Selection.activeObject);
+			}
+		}
+
+		activeObjectEditor?.OnPreviewGUI(GUILayoutUtility.GetRect(100, 100), EditorStyles.whiteLabel);
 	}
 }

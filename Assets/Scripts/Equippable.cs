@@ -5,7 +5,6 @@ using UnityEngine.Events;
 
 public class Equippable: MonoBehaviour
 {
-	public float radius;
 	public Equipmentizer equip;
 	public UnityEvent equipped;
 

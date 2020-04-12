@@ -10,15 +10,24 @@ public class ColliderFitter : MonoBehaviour
 	{
 		if (Selection.activeGameObject)
 		{
-			BoxCollider bc = Selection.activeGameObject.GetComponent<BoxCollider>();
+			FitCollider(Selection.activeGameObject, true);
+		}
+	}
+
+	public static void FitCollider(GameObject obj, bool includeHidden)
+	{
+		if (obj)
+		{
+			BoxCollider bc = obj.GetComponent<BoxCollider>();
 			if (bc)
 			{
-				Renderer[] rends = bc.GetComponentsInChildren<Renderer>(true);
+				Renderer[] rends = bc.GetComponentsInChildren<Renderer>(includeHidden);
 
 				Vector3 max = Vector3.negativeInfinity;
 				Vector3 min = Vector3.positiveInfinity;
 				foreach (var rend in rends)
 				{
+					Debug.Log(rend.bounds);
 					Vector3 rendMin = rend.bounds.min;
 					Vector3 rendMax = rend.bounds.max;
 
