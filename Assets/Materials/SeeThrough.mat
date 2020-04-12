@@ -274,4 +274,4 @@ Material:
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
-    - center_world_position: {r: -2.2443907, g: 1.2233334, b: 0.1567927, a: 0}
+    - center_world_position: {r: 0.09012176, g: 1.2233334, b: 0.075594865, a: 0}

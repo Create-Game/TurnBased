@@ -9,6 +9,7 @@ public class DragDropContainer : MonoBehaviour, IDropHandler
 	Transform retarget;
 	[SerializeField]
 	bool centered;
+	IDropAcceptor acceptor;
 
 	RectTransform rect;
 
@@ -18,6 +19,9 @@ public class DragDropContainer : MonoBehaviour, IDropHandler
 			retarget = transform;
 
 		rect = retarget.GetComponent<RectTransform>();
+		acceptor = GetComponent<IDropAcceptor>();
+		if (acceptor == null)
+			Debug.LogError("There is no drop acceptor on drop container.");
 	}
 
 	public void OnDrop(PointerEventData eventData)
@@ -27,18 +31,21 @@ public class DragDropContainer : MonoBehaviour, IDropHandler
 		if (!item)
 			return;
 
-		item.DropHandeled();
-		item.transform.SetParent(retarget);
-
-		RectTransform itemRect = item.GetComponent<RectTransform>();
-
-		if (centered)
+		if (acceptor.ApplyDrop(item.dragItem.GetItem()))
 		{
-			itemRect.anchoredPosition = new Vector2(rect.sizeDelta.x / 2f, - rect.sizeDelta.y / 2f + itemRect.sizeDelta.y / 2f);
-		}
-		else
-		{
-			PlaceInside(itemRect);
+			item.DropHandeled();
+			item.transform.SetParent(retarget);
+
+			RectTransform itemRect = item.GetComponent<RectTransform>();
+
+			if (centered)
+			{
+				itemRect.anchoredPosition = new Vector2(rect.sizeDelta.x / 2f, -rect.sizeDelta.y / 2f + itemRect.sizeDelta.y / 2f);
+			}
+			else
+			{
+				PlaceInside(itemRect);
+			}
 		}
 	}
 
@@ -64,4 +71,10 @@ public class DragDropContainer : MonoBehaviour, IDropHandler
 
 		itemRect.anchoredPosition = newPosition;
 	}
+}
+
+public interface IDropAcceptor
+{
+	void InitUI(SkinnedMeshRenderer characterRend, Inventory inv);
+	bool ApplyDrop(Item item);
 }

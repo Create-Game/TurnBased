@@ -5,8 +5,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
+[RequireComponent(typeof(ItemUI))]
 public class DragDropItem : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
+	[HideInInspector]
+	public ItemUI dragItem;
+
 	Vector3 offset = new Vector3(2f, 2f, 0f);
 	Transform lastParent;
 	int lastSibling;
@@ -16,6 +20,7 @@ public class DragDropItem : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 	private void Awake()
 	{
 		rectT = GetComponent<RectTransform>();
+		dragItem = GetComponent<ItemUI>();
 	}
 
 	public void OnDrag(PointerEventData eventData)

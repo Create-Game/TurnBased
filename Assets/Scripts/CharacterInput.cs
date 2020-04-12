@@ -8,6 +8,8 @@ public class CharacterInput : MonoBehaviour
 	[SerializeField]
 	SkinnedMeshRenderer characterRenderer;
 	[SerializeField]
+	Inventory characterInventory;
+	[SerializeField]
 	NavMeshAgent agent;
 	[SerializeField]
 	Animator animator;
@@ -134,6 +136,8 @@ public class CharacterInput : MonoBehaviour
 		public override void Update(float time)
 		{
 			eventAction?.Invoke();
+			eventAction = null;
+			Complete();
 		}
 	}
 
@@ -208,13 +212,13 @@ public class CharacterInput : MonoBehaviour
 
 		if (Physics.Raycast(ray, out info))
 		{
-			Equippable equippable = info.collider.GetComponent<Equippable>();
+			ItemPickup pickup = info.collider.GetComponent<ItemPickup>();
 
-			if (equippable)
+			if (pickup)
 			{
-				Action move = new MoveAction(agent, info.point, animator, equippable.radius);
+				Action move = new MoveAction(agent, info.point, animator, pickup.radius);
 				Action use = move.child = new UseAnimationEventAction(animator, "use", animEvent);
-				use.child = new EventAction(() => equippable.Equip(characterRenderer));
+				use.child = new EventAction(() => pickup.Pickup(characterInventory));
 
 				actionContainer.SetCurrentAction(move);
 			}

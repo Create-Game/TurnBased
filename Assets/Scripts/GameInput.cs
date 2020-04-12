@@ -16,13 +16,15 @@ public class GameInput: MonoBehaviour
 	static Vector3 startDragMousePosition;
 	static Vector3 lastFrameDragMousePosition;
 
-	public GameObject inventoryUI;
+	public SkinnedMeshRenderer characterSkin;
+	public Inventory characterInventory;
+	public InventoryUI inventoryUI;
 
 	private void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.I))
 		{
-			inventoryUI.SetActive(true);
+			inventoryUI.Show(characterSkin, characterInventory);
 		}
 	}
 

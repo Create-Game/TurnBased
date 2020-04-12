@@ -30,6 +30,9 @@ ModelImporter:
   - first:
       74: 8350816339630823838
     second: Equip
+  - first:
+      74: 6957390728100926841
+    second: Body-rig|PickupGround
   externalObjects: {}
   materials:
     materialImportMode: 1
@@ -204,11 +207,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Equip
-      takeName: Body-rig|Walk02
+      name: Body-rig|PickupGround
+      takeName: Body-rig|PickupGround
       internalID: 0
       firstFrame: 0
-      lastFrame: 35
+      lastFrame: 59
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -228,7 +231,7 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.6390042
+      - time: 0.5622996
         functionName: AnimationEvent
         data: 
         objectReferenceParameter: {instanceID: 0}
