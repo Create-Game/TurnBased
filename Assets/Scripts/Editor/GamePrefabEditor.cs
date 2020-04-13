@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEditor;
 using System;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
+using System.Reflection;
+using System.Linq;
 
 public class GamePrefabEditor: EditorWindow
 {
@@ -112,6 +116,16 @@ public class GamePrefabEditor: EditorWindow
 	GamePrefabComponentEditor equip = new GamePrefabComponentEditor(typeof(Equippable));
 	GamePrefabComponentEditor pickup = new GamePrefabComponentEditor(typeof(ItemPickup));
 
+	void FlushEditors()
+	{
+		desc.editor = null;
+		desc.component = null;
+		equip.editor = null;
+		equip.component = null;
+		pickup.editor = null;
+		pickup.component = null;
+	}
+
 	void OnGUI()
 	{
 		GameObject obj = Selection.activeGameObject;
@@ -122,63 +136,151 @@ public class GamePrefabEditor: EditorWindow
 			return;
 		}
 
-		if (obj.tag == "GamePrefab")
+		if (!EditorSceneManager.IsPreviewSceneObject(obj))
 		{
-			// edit prefab
+			bool isGamePrefab = obj.transform.root.gameObject.tag == "GamePrefab";
 
-			obj.name = GUILayout.TextField(obj.name);
-
-			var rig = obj.transform.GetChild(0).Find("Body-rig");
-			if (rig && (GUILayout.Button(rig.gameObject.activeSelf ? disableRigButton : enableRigButton)))
+			if (isGamePrefab)
 			{
-				rig.gameObject.SetActive(!rig.gameObject.activeSelf);
-			}
+				if (PrefabUtility.IsPartOfAnyPrefab(obj))
+				{
+					obj = obj.transform.root.gameObject;
+					if (GUILayout.Button("Edit game prefab"))
+					{
+						FlushEditors();
 
-			GetForcedComponentEditor(obj, ref desc)?.OnInspectorGUI();
+						string path = AssetDatabase.GetAssetPath(obj);
 
-			GetComponentEditor(obj, "It is equippable", "It is not equippable", ref equip)?.OnInspectorGUI();
-			GetComponentEditor(obj, "Can pick it up", "Can not pick that up", ref pickup)?.OnInspectorGUI();
+						if (PrefabUtility.IsPartOfPrefabInstance(obj))
+						{
+							path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(obj);
+						}
 
-			/*
-			Renderer[] rends = obj.GetComponentsInChildren<Renderer>();
-
-			foreach (var rend in rends)
-			{
-				EditorGUILayout.ObjectField(rend, typeof(Renderer), true);
-			}
-
-			// preview prefab
-			if ((activeObjectEditor == null) || (previewTarget != Selection.activeObject))
-			{
-				previewTarget = Selection.activeObject as GameObject;
-
-				if (previewTarget != null)
-					activeObjectEditor = Editor.CreateEditor(Selection.activeObject);
+						Type t = typeof(UnityEditor.Experimental.SceneManagement.PrefabStageUtility);
+						System.Reflection.MethodInfo mi = t.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)
+							.Single(m =>
+								m.Name == "OpenPrefab"
+								&& m.GetParameters().Length == 1
+								&& m.GetParameters()[0].ParameterType == typeof(string)
+						);
+						mi.Invoke(null, new object[] { path });
+					}
+				}
 				else
-					activeObjectEditor = null;
+				{
+					Debug.Log("Not a game prefab object");
+				}
 			}
-
-			activeObjectEditor?.OnPreviewGUI(GUILayoutUtility.GetRect(100, 100), EditorStyles.whiteLabel);
-			*/
+			else
+			{
+				// make prefab
+				if (GUILayout.Button("Make Game Prefab"))
+				{
+					MakePrefab(obj);
+				}
+			}
 		}
-
 		else
 		{
-			// make prefab
-			if (GUILayout.Button("Make Game Prefab", GUILayout.Width(150f)))
+			obj = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot;
+
+			if (obj.tag == "GamePrefab")
 			{
-				GameObject go = new GameObject(obj.name);
+				// edit prefab
 
-				GameObject child = Instantiate(obj);
-				child.name = obj.name;
+				// rename asset
+				GUILayout.BeginHorizontal();
+				obj.name = GUILayout.TextField(obj.name);
+				{
+					var stage = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+					string currentName = System.IO.Path.GetFileNameWithoutExtension(stage.prefabAssetPath);
+					if (obj.name != currentName && GUILayout.Button("Apply", GUILayout.Width(150f)))
+					{
+						AssetDatabase.RenameAsset(stage.prefabAssetPath, obj.name);
+						Selection.SetActiveObjectWithContext(stage.scene.GetRootGameObjects().FirstOrDefault(), null);
+						//Selection.SetActiveObjectWithContext(stage.prefabContentsRoot, null);
+					}
+				}
+				GUILayout.EndHorizontal();
 
-				child.transform.SetParent(go.transform);
+				var rig = obj.transform.GetChild(0).Find("Body-rig");
+				if (rig && (GUILayout.Button(rig.gameObject.activeSelf ? disableRigButton : enableRigButton)))
+				{
+					rig.gameObject.SetActive(!rig.gameObject.activeSelf);
+				}
 
-				go.tag = "GamePrefab";
+				GetForcedComponentEditor(obj, ref desc)?.OnInspectorGUI();
 
-				Selection.SetActiveObjectWithContext(go, null);
-				EditorGUIUtility.PingObject(go);
+				GetComponentEditor(obj, "It is equippable", "It is not equippable", ref equip)?.OnInspectorGUI();
+				GetComponentEditor(obj, "Can pick it up", "Can not pick that up", ref pickup)?.OnInspectorGUI();
+
+				if (GUILayout.Button("Save"))
+				{
+					var stage = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+
+					PrefabUtility.SaveAsPrefabAsset(obj, stage.prefabAssetPath);
+
+					try
+					{
+						//	EditorSceneManager.ClosePreviewScene(stage.scene);
+					}
+					catch
+					{
+
+					}
+
+					//PrefabUtility.ApplyPrefabInstance(obj, InteractionMode.AutomatedAction);
+				}
 			}
 		}
+	}
+
+	void MakePrefab(GameObject obj)
+	{
+		GameObject go = new GameObject(obj.name);
+
+		GameObject child = null;
+		if (PrefabUtility.IsPartOfPrefabAsset(obj))
+		{
+			child = PrefabUtility.InstantiatePrefab(obj) as GameObject;
+		}
+		else if (PrefabUtility.IsPartOfPrefabInstance(obj))
+		{
+			child = obj;
+		}
+		else
+		{
+			child = obj;
+		}
+
+		float rotationFix = -90f;
+		if (child.transform.childCount > 0)
+			rotationFix = 0f;
+
+		child.name = obj.name;
+
+		Vector3 oldPosition = child.transform.position;
+		Vector3 oldRotation = child.transform.rotation.eulerAngles;
+
+		child.transform.SetParent(go.transform);
+		child.transform.localPosition = Vector3.zero;
+		child.transform.localRotation = Quaternion.identity;
+		child.transform.Rotate(rotationFix, 0f, 0f);
+		oldRotation.x -= rotationFix;
+
+		go.tag = "GamePrefab";
+
+		GameObject prefabObj = PrefabUtility.SaveAsPrefabAsset(go, System.IO.Path.Combine("Assets", "Prefabs", go.name + ".prefab"));
+
+		DestroyImmediate(go);
+		obj = PrefabUtility.InstantiatePrefab(prefabObj) as GameObject;
+
+		obj.transform.position = oldPosition;
+		obj.transform.Rotate(oldRotation);
+
+		Selection.SetActiveObjectWithContext(obj, null);
+		EditorGUIUtility.PingObject(prefabObj);
+
+		//obj = prefabObj;
 	}
 }

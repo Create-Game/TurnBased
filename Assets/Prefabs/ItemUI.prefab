@@ -161,6 +161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d63ccfe0e85b3b94eb0a88d57408ac95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dragItem: {fileID: 0}
 --- !u!114 &-7252671549342555093
 MonoBehaviour:
   m_ObjectHideFlags: 0

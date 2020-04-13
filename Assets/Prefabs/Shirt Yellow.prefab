@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 6687305783800424561}
   - component: {fileID: 6687305783800424563}
   - component: {fileID: 6687305783800424562}
+  - component: {fileID: 6950671313854144714}
   m_Layer: 0
   m_Name: Shirt
   m_TagString: GamePrefab
@@ -72,8 +73,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83b5518d35cb64c44a9193d5660ec723, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 0.4
+  radius: 0.3
   item: {fileID: 11400000, guid: c33f1451a1abde143a83036e96127c17, type: 2}
+  worldView: {fileID: 6957628078585965704}
 --- !u!114 &6687305783800424562
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,7 +88,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a467bc4680d0a954ab39661dc0814f11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 0.2
   equip: {fileID: 6687305783636719722}
   equipped:
     m_PersistentCalls:
@@ -124,6 +125,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6950671313854144714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6687305783800424567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab27218c761b6194a877a9e231fdac85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  caption: Yellow shirt
+  text: Simple cotton shirt. It is yellow.
 --- !u!1001 &6687305783636719720
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -223,6 +238,12 @@ Transform:
 --- !u!1 &3528424677745191388 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -1424986168651574860, guid: c24488fded175f741a4b6c30a158d894,
+    type: 3}
+  m_PrefabInstance: {fileID: 6687305783636719720}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6957628078585965704 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4341576634314429664, guid: c24488fded175f741a4b6c30a158d894,
     type: 3}
   m_PrefabInstance: {fileID: 6687305783636719720}
   m_PrefabAsset: {fileID: 0}

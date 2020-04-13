@@ -30,6 +30,10 @@ public class PickupItemEditor: Editor
 		if (pickup.item)
 			pickup.item.name = itemName;
 		pickup.item = EditorGUILayout.ObjectField(pickup.item, typeof(Item), false) as Item;
+
+		if (pickup.item)
+			pickup.item.icon = EditorGUILayout.ObjectField(pickup.item.icon, typeof(Sprite), false) as Sprite;
+
 		GUILayout.EndHorizontal();
 
 		if (!pickup.item)
@@ -40,7 +44,10 @@ public class PickupItemEditor: Editor
 
 				Item newItem = ScriptableObject.CreateInstance<Item>();
 				// FIXME: временно, тестовый вариант
-				newItem.prefab = pickup.gameObject;
+
+				string assetPath = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage().prefabAssetPath;
+
+				newItem.prefab = AssetDatabase.LoadAssetAtPath(assetPath, typeof(GameObject)) as GameObject;
 
 				pickup.item = newItem;
 
