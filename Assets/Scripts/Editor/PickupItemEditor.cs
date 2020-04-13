@@ -25,7 +25,8 @@ public class PickupItemEditor: Editor
 		if (pickup.item)
 			itemName = pickup.item.name;
 		else if (string.IsNullOrEmpty(itemName))
-			itemName = "New Item";
+			itemName = pickup.transform.root.name;
+
 		itemName = EditorGUILayout.TextField(itemName);
 		if (pickup.item)
 			pickup.item.name = itemName;
@@ -40,18 +41,7 @@ public class PickupItemEditor: Editor
 		{
 			if (GUILayout.Button("Create new item"))
 			{
-				string path = AssetDatabase.GenerateUniqueAssetPath(System.IO.Path.Combine("Assets", "Items", itemName + ".asset"));
-
-				Item newItem = ScriptableObject.CreateInstance<Item>();
-				// FIXME: временно, тестовый вариант
-
-				string assetPath = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage().prefabAssetPath;
-
-				newItem.prefab = AssetDatabase.LoadAssetAtPath(assetPath, typeof(GameObject)) as GameObject;
-
-				pickup.item = newItem;
-
-				AssetDatabase.CreateAsset(newItem, path);
+				pickup.item = CreateItem(itemName, UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage().prefabAssetPath);
 			}
 		}
 
@@ -110,5 +100,19 @@ public class PickupItemEditor: Editor
 			if (colliderEditor == null)
 				DestroyImmediate(colliderEditor);
 		}
+	}
+
+	public static Item CreateItem(string name, string prefabPath)
+	{
+		string path = AssetDatabase.GenerateUniqueAssetPath(System.IO.Path.Combine("Assets", "Items", name + ".asset"));
+
+		Item newItem = ScriptableObject.CreateInstance<Item>();
+		// FIXME: временно, тестовый вариант
+
+		newItem.prefab = AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject)) as GameObject;
+
+		AssetDatabase.CreateAsset(newItem, path);
+
+		return newItem;
 	}
 }

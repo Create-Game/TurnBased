@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 203b5dfeff0f23d44937541944868d79, type: 3}
   m_Name: Green Shirt
   m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  prefab: {fileID: 8628848829766349062, guid: a781d5ed663745946b9e8387ddba4440, type: 3}
+  icon: {fileID: 21300000, guid: 0473d012a0231304180cea1247412975, type: 3}
+  prefab: {fileID: 948621521580271137, guid: df25f6baeaee887488c53f19cfadb56c, type: 3}

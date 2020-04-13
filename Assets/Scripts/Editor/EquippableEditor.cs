@@ -46,11 +46,23 @@ public class EquippableEditor: Editor
 			GUILayout.EndHorizontal();
 		}
 
+		SetupEvents(equip);
+
+		defaultEditor = EditorGUILayout.Foldout(defaultEditor, "-- default inspector --");
+
+		if (defaultEditor)
+		{
+			base.OnInspectorGUI();
+		}
+	}
+
+	public static void SetupEvents(Equippable equip)
+	{
 		ItemPickup pickup = equip.GetComponent<ItemPickup>();
 		Collider collider = equip.GetComponent<Collider>();
 
 		bool pickupHides = !pickup || !pickup.worldView;
-		bool colliderHides = !collider;
+		bool colliderHides = !(collider != null);
 		bool skinShows = !equip.equip;
 
 		if (equip.equipped != null)
@@ -76,6 +88,9 @@ public class EquippableEditor: Editor
 			}
 		}
 
+		if (equip.equipped == null)
+			equip.equipped = new UnityEngine.Events.UnityEvent();
+
 		if (!skinShows)
 			UnityEventTools.AddBoolPersistentListener(equip.equipped, new UnityEngine.Events.UnityAction<bool>(equip.equip.gameObject.SetActive), true);
 		if (!pickupHides)
@@ -84,14 +99,8 @@ public class EquippableEditor: Editor
 		{
 			var test = Delegate.CreateDelegate(typeof(UnityEngine.Events.UnityAction<bool>), collider, "set_enabled") as
 				UnityEngine.Events.UnityAction<bool>;
+
 			UnityEventTools.AddBoolPersistentListener(equip.equipped, test, false);
-		}
-
-		defaultEditor = EditorGUILayout.Foldout(defaultEditor, "-- default inspector --");
-
-		if (defaultEditor)
-		{
-			base.OnInspectorGUI();
 		}
 	}
 }
